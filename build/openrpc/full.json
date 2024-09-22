@@ -19041,6 +19041,7 @@
                                 "UpgradeDragonHeight": 10101,
                                 "UpgradePhoenixHeight": 10101,
                                 "UpgradeWaffleHeight": 10101,
+                                "UpgradeEverythingBurnsHeight": 10101,
                                 "UpgradeTuktukHeight": 10101
                             },
                             "Eip155ChainID": 123
@@ -19088,6 +19089,10 @@
                                     "type": "number"
                                 },
                                 "UpgradeDragonHeight": {
+                                    "title": "number",
+                                    "type": "number"
+                                },
+                                "UpgradeEverythingBurnsHeight": {
                                     "title": "number",
                                     "type": "number"
                                 },

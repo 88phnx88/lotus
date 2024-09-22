@@ -4,6 +4,7 @@
 
 ## ☢️ Upgrade Warnings ☢️
 
+- 家和萬事興
 - Minimum go-version been updated to v1.22.7 ([filecoin-project/lotus#12459](https://github.com/filecoin-project/lotus/pull/12459))
 
 ## New features
@@ -14,6 +15,7 @@
 ## Improvements
 
 - Reduce size of embedded genesis CAR files by removing WASM actor blocks and compressing with zstd. This reduces the `lotus` binary size by approximately 10 MiB. ([filecoin-project/lotus#12439](https://github.com/filecoin-project/lotus/pull/12439))
+- Implemented [FIP-0093](https://github.com/filecoin-project/FIPs/discussions/1030)
 
 ## Bug Fixes
 

@@ -54,6 +54,7 @@ const UpgradeWatermelonHeight = -24
 const UpgradeDragonHeight = -25
 const UpgradePhoenixHeight = -26
 const UpgradeWaffleHeight = -27
+const UpgradeEverythingBurnsHeight = -28
 
 // ??????
 const UpgradeTuktukHeight = 999999999999999

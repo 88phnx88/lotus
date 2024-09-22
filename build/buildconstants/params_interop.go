@@ -53,6 +53,7 @@ var UpgradeWatermelonHeight = abi.ChainEpoch(-24)
 var UpgradeDragonHeight = abi.ChainEpoch(-25)
 var UpgradePhoenixHeight = abi.ChainEpoch(-26)
 var UpgradeWaffleHeight = abi.ChainEpoch(-27)
+var UpgradeEverythingBurnsHeight = abi.ChainEpoch(-28)
 
 const UpgradeTuktukHeight = 50
 

@@ -107,6 +107,9 @@ const UpgradePhoenixHeight abi.ChainEpoch = UpgradeDragonHeight + 120
 // 2024-08-06T12:00:00Z
 const UpgradeWaffleHeight abi.ChainEpoch = 4154640
 
+// 2024-10-30T12:00:00Z
+var UpgradeEverythingBurnsHeight abi.ChainEpoch = 4399440
+
 // ??????
 var UpgradeTuktukHeight = abi.ChainEpoch(9999999999)
 
@@ -132,6 +135,10 @@ var EquivocationDelaySecs = uint64(2)
 func init() {
 	if os.Getenv("LOTUS_USE_TEST_ADDRESSES") != "1" {
 		SetAddressNetwork(address.Mainnet)
+	}
+
+	if os.Getenv("LOTUS_DISABLE_EVERYTHINGBURNS") == "1" {
+		UpgradeEverythingBurnsHeight = math.MaxInt64 - 1
 	}
 
 	if os.Getenv("LOTUS_DISABLE_TUKTUK") == "1" {

@@ -164,35 +164,36 @@ type NetworkParams struct {
 }
 
 type ForkUpgradeParams struct {
-	UpgradeSmokeHeight       abi.ChainEpoch
-	UpgradeBreezeHeight      abi.ChainEpoch
-	UpgradeIgnitionHeight    abi.ChainEpoch
-	UpgradeLiftoffHeight     abi.ChainEpoch
-	UpgradeAssemblyHeight    abi.ChainEpoch
-	UpgradeRefuelHeight      abi.ChainEpoch
-	UpgradeTapeHeight        abi.ChainEpoch
-	UpgradeKumquatHeight     abi.ChainEpoch
-	BreezeGasTampingDuration abi.ChainEpoch
-	UpgradeCalicoHeight      abi.ChainEpoch
-	UpgradePersianHeight     abi.ChainEpoch
-	UpgradeOrangeHeight      abi.ChainEpoch
-	UpgradeClausHeight       abi.ChainEpoch
-	UpgradeTrustHeight       abi.ChainEpoch
-	UpgradeNorwegianHeight   abi.ChainEpoch
-	UpgradeTurboHeight       abi.ChainEpoch
-	UpgradeHyperdriveHeight  abi.ChainEpoch
-	UpgradeChocolateHeight   abi.ChainEpoch
-	UpgradeOhSnapHeight      abi.ChainEpoch
-	UpgradeSkyrHeight        abi.ChainEpoch
-	UpgradeSharkHeight       abi.ChainEpoch
-	UpgradeHyggeHeight       abi.ChainEpoch
-	UpgradeLightningHeight   abi.ChainEpoch
-	UpgradeThunderHeight     abi.ChainEpoch
-	UpgradeWatermelonHeight  abi.ChainEpoch
-	UpgradeDragonHeight      abi.ChainEpoch
-	UpgradePhoenixHeight     abi.ChainEpoch
-	UpgradeWaffleHeight      abi.ChainEpoch
-	UpgradeTuktukHeight      abi.ChainEpoch
+	UpgradeSmokeHeight           abi.ChainEpoch
+	UpgradeBreezeHeight          abi.ChainEpoch
+	UpgradeIgnitionHeight        abi.ChainEpoch
+	UpgradeLiftoffHeight         abi.ChainEpoch
+	UpgradeAssemblyHeight        abi.ChainEpoch
+	UpgradeRefuelHeight          abi.ChainEpoch
+	UpgradeTapeHeight            abi.ChainEpoch
+	UpgradeKumquatHeight         abi.ChainEpoch
+	BreezeGasTampingDuration     abi.ChainEpoch
+	UpgradeCalicoHeight          abi.ChainEpoch
+	UpgradePersianHeight         abi.ChainEpoch
+	UpgradeOrangeHeight          abi.ChainEpoch
+	UpgradeClausHeight           abi.ChainEpoch
+	UpgradeTrustHeight           abi.ChainEpoch
+	UpgradeNorwegianHeight       abi.ChainEpoch
+	UpgradeTurboHeight           abi.ChainEpoch
+	UpgradeHyperdriveHeight      abi.ChainEpoch
+	UpgradeChocolateHeight       abi.ChainEpoch
+	UpgradeOhSnapHeight          abi.ChainEpoch
+	UpgradeSkyrHeight            abi.ChainEpoch
+	UpgradeSharkHeight           abi.ChainEpoch
+	UpgradeHyggeHeight           abi.ChainEpoch
+	UpgradeLightningHeight       abi.ChainEpoch
+	UpgradeThunderHeight         abi.ChainEpoch
+	UpgradeWatermelonHeight      abi.ChainEpoch
+	UpgradeDragonHeight          abi.ChainEpoch
+	UpgradePhoenixHeight         abi.ChainEpoch
+	UpgradeWaffleHeight          abi.ChainEpoch
+	UpgradeEverythingBurnsHeight abi.ChainEpoch
+	UpgradeTuktukHeight          abi.ChainEpoch
 }
 
 // ChainExportConfig holds configuration for chain ranged exports.
