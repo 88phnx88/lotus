@@ -59,6 +59,7 @@ const UpgradeDragonHeight = -25
 const UpgradePhoenixHeight = -26
 
 const UpgradeWaffleHeight = 100
+const UpgradeEverythingBurnsHeight = -28
 
 // This fix upgrade only ran on calibrationnet
 const UpgradeWatermelonFixHeight = -100

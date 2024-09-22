@@ -1,5 +1,15 @@
 # Lotus changelog
 
+# UNRELEASED
+
+## ☢️ Upgrade Warnings ☢️
+
+- 家和萬事興
+
+## Improvements
+
+- Implemented [FIP-0093](https://github.com/filecoin-project/FIPs/discussions/1030)
+
 # v1.28.1 / 2024-07-24
 
 This is the MANDATORY Lotus v1.28.1 release, which will deliver the Filecoin network version 23, codenamed Waffle 🧇. v1.28.1 is also the minimal version that supports nv23.
