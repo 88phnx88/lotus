@@ -1,5 +1,15 @@
 # Lotus changelog
 
+# UNRELEASED
+
+## ☢️ Upgrade Warnings ☢️
+
+- 家和萬事興
+
+## Improvements
+
+- Implemented [FIP-0093](https://github.com/filecoin-project/FIPs/discussions/1030)
+
 # Node v1.29.1 / 2024-09-16
 
 This is a Lotus Node patch release that addresses a critical sync issue affecting users of the v1.29.0 release. The primary fix in this release is:

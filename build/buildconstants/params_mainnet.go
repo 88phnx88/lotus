@@ -107,6 +107,9 @@ const UpgradePhoenixHeight abi.ChainEpoch = UpgradeDragonHeight + 120
 // 2024-08-06T12:00:00Z
 var UpgradeWaffleHeight abi.ChainEpoch = 4154640
 
+// 2024-10-30T12:00:00Z
+var UpgradeEverythingBurnsHeight abi.ChainEpoch = 4399440
+
 // This fix upgrade only ran on calibrationnet
 const UpgradeWatermelonFixHeight abi.ChainEpoch = -1
 
@@ -133,6 +136,10 @@ func init() {
 
 	if os.Getenv("LOTUS_DISABLE_WAFFLE") == "1" {
 		UpgradeWaffleHeight = math.MaxInt64 - 1
+	}
+
+	if os.Getenv("LOTUS_DISABLE_EVERYTHINGBURNS") == "1" {
+		UpgradeEverythingBurnsHeight = math.MaxInt64 - 1
 	}
 
 	// NOTE: DO NOT change this unless you REALLY know what you're doing. This is not consensus critical, however,
