@@ -1,5 +1,15 @@
 # Lotus changelog
 
+# UNRELEASED
+
+## ☢️ Upgrade Warnings ☢️
+
+- 家和萬事興
+
+## Improvements
+
+- Implemented [FIP-0093](https://github.com/filecoin-project/FIPs/discussions/1030)
+
 # Node v1.29.2 / 2024-10-03
 
 This is the stable release for Lotus node v1.29.2. Key updates in this release include:
