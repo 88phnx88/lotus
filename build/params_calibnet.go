@@ -4,6 +4,7 @@
 package build
 
 import (
+	"math"
 	"os"
 	"strconv"
 
@@ -101,8 +102,8 @@ const UpgradeCalibrationDragonFixHeight = 1493854
 // 2024-07-11T12:00:00Z
 const UpgradeWaffleHeight = 1779094
 
-// 2024-10-02T12:00:00Z
-const UpgradeEverythingBurnsHeight = 2018134
+// ???
+const UpgradeEverythingBurnsHeight = math.MaxInt64 - 1
 
 var SupportedProofTypes = []abi.RegisteredSealProof{
 	abi.RegisteredSealProof_StackedDrg32GiBV1,
