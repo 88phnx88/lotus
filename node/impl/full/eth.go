@@ -57,7 +57,7 @@ type EthModuleAPI interface {
 	EthGetBlockTransactionCountByNumber(ctx context.Context, blkNum ethtypes.EthUint64) (ethtypes.EthUint64, error)
 	EthGetBlockTransactionCountByHash(ctx context.Context, blkHash ethtypes.EthHash) (ethtypes.EthUint64, error)
 	EthGetBlockByHash(ctx context.Context, blkHash ethtypes.EthHash, fullTxInfo bool) (ethtypes.EthBlock, error)
-	EthGetBlockByNumber(ctx context.Context, blkNum string, fullTxInfo bool) (ethtypes.EthBlock, error)
+	EthGetBlockByNumber(ctx context.Context, blkNum string, fullTxInfo bool) (*ethtypes.EthBlock, error)
 	EthGetTransactionByHash(ctx context.Context, txHash *ethtypes.EthHash) (*ethtypes.EthTx, error)
 	EthGetTransactionByHashLimited(ctx context.Context, txHash *ethtypes.EthHash, limit abi.ChainEpoch) (*ethtypes.EthTx, error)
 	EthGetMessageCidByTransactionHash(ctx context.Context, txHash *ethtypes.EthHash) (*cid.Cid, error)
@@ -84,6 +84,8 @@ type EthModuleAPI interface {
 	EthTraceReplayBlockTransactions(ctx context.Context, blkNum string, traceTypes []string) ([]*ethtypes.EthTraceReplayBlockTransaction, error)
 	EthTraceTransaction(ctx context.Context, txHash string) ([]*ethtypes.EthTraceTransaction, error)
 	EthTraceFilter(ctx context.Context, filter ethtypes.EthTraceFilterCriteria) ([]*ethtypes.EthTraceFilterResult, error)
+	EthGetBlockReceiptsLimited(ctx context.Context, blkParam ethtypes.EthBlockNumberOrHash, limit abi.ChainEpoch) ([]*api.EthTxReceipt, error)
+	EthGetBlockReceipts(ctx context.Context, blkParam ethtypes.EthBlockNumberOrHash) ([]*api.EthTxReceipt, error)
 }
 
 type EthEventAPI interface {
@@ -339,12 +341,23 @@ func (a *EthModule) EthGetBlockByHash(ctx context.Context, blkHash ethtypes.EthH
 	return blk, nil
 }
 
-func (a *EthModule) EthGetBlockByNumber(ctx context.Context, blkParam string, fullTxInfo bool) (ethtypes.EthBlock, error) {
+func (a *EthModule) EthGetBlockByNumber(ctx context.Context, blkParam string, fullTxInfo bool) (*ethtypes.EthBlock, error) {
+	// Get the tipset for the specified block parameter
 	ts, err := getTipsetByBlockNumber(ctx, a.Chain, blkParam, true)
 	if err != nil {
-		return ethtypes.EthBlock{}, err
+		if err == ErrNullRound {
+			// Return nil for null rounds
+			return nil, nil
+		}
+		return nil, xerrors.Errorf("failed to get tipset: %w", err)
 	}
-	return newEthBlockFromFilecoinTipSet(ctx, ts, fullTxInfo, a.Chain, a.StateAPI)
+	// Create an Ethereum block from the Filecoin tipset
+	block, err := newEthBlockFromFilecoinTipSet(ctx, ts, fullTxInfo, a.Chain, a.StateAPI)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to create Ethereum block: %w", err)
+	}
+
+	return &block, nil
 }
 
 func (a *EthModule) EthGetTransactionByHash(ctx context.Context, txHash *ethtypes.EthHash) (*ethtypes.EthTx, error) {
@@ -460,21 +473,35 @@ func (a *EthModule) EthGetTransactionHashByCid(ctx context.Context, cid cid.Cid)
 func (a *EthModule) EthGetTransactionCount(ctx context.Context, sender ethtypes.EthAddress, blkParam ethtypes.EthBlockNumberOrHash) (ethtypes.EthUint64, error) {
 	addr, err := sender.ToFilecoinAddress()
 	if err != nil {
-		return ethtypes.EthUint64(0), nil
+		return ethtypes.EthUint64(0), xerrors.Errorf("invalid address: %w", err)
 	}
 
+	// Handle "pending" block parameter separately
+	if blkParam.PredefinedBlock != nil && *blkParam.PredefinedBlock == "pending" {
+		nonce, err := a.MpoolAPI.MpoolGetNonce(ctx, addr)
+		if err != nil {
+			return ethtypes.EthUint64(0), xerrors.Errorf("failed to get nonce from mpool: %w", err)
+		}
+		return ethtypes.EthUint64(nonce), nil
+	}
+
+	// For all other cases, get the tipset based on the block parameter
 	ts, err := getTipsetByEthBlockNumberOrHash(ctx, a.Chain, blkParam)
 	if err != nil {
 		return ethtypes.EthUint64(0), xerrors.Errorf("failed to process block param: %v; %w", blkParam, err)
 	}
 
-	// First, handle the case where the "sender" is an EVM actor.
-	if actor, err := a.StateManager.LoadActor(ctx, addr, ts); err != nil {
+	// Get the actor state at the specified tipset
+	actor, err := a.StateManager.LoadActor(ctx, addr, ts)
+	if err != nil {
 		if errors.Is(err, types.ErrActorNotFound) {
 			return 0, nil
 		}
-		return 0, xerrors.Errorf("failed to lookup contract %s: %w", sender, err)
-	} else if builtinactors.IsEvmActor(actor.Code) {
+		return 0, xerrors.Errorf("failed to lookup actor %s: %w", sender, err)
+	}
+
+	// Handle EVM actor case
+	if builtinactors.IsEvmActor(actor.Code) {
 		evmState, err := builtinevm.Load(a.Chain.ActorStore(ctx), actor)
 		if err != nil {
 			return 0, xerrors.Errorf("failed to load evm state: %w", err)
@@ -488,11 +515,8 @@ func (a *EthModule) EthGetTransactionCount(ctx context.Context, sender ethtypes.
 		return ethtypes.EthUint64(nonce), err
 	}
 
-	nonce, err := a.Mpool.GetNonce(ctx, addr, ts.Key())
-	if err != nil {
-		return ethtypes.EthUint64(0), nil
-	}
-	return ethtypes.EthUint64(nonce), nil
+	// For non-EVM actors, get the nonce from the actor state
+	return ethtypes.EthUint64(actor.Nonce), nil
 }
 
 func (a *EthModule) EthGetTransactionReceipt(ctx context.Context, txHash ethtypes.EthHash) (*api.EthTxReceipt, error) {
@@ -525,9 +549,22 @@ func (a *EthModule) EthGetTransactionReceiptLimited(ctx context.Context, txHash 
 		return nil, xerrors.Errorf("failed to convert %s into an Eth Txn: %w", txHash, err)
 	}
 
-	receipt, err := newEthTxReceipt(ctx, tx, msgLookup, a.ChainAPI, a.StateAPI, a.EthEventHandler)
+	ts, err := a.Chain.GetTipSetFromKey(ctx, msgLookup.TipSet)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to convert %s into an Eth Receipt: %w", txHash, err)
+		return nil, xerrors.Errorf("failed to lookup tipset %s when constructing the eth txn receipt: %w", msgLookup.TipSet, err)
+	}
+
+	// The tx is located in the parent tipset
+	parentTs, err := a.Chain.LoadTipSet(ctx, ts.Parents())
+	if err != nil {
+		return nil, xerrors.Errorf("failed to lookup tipset %s when constructing the eth txn receipt: %w", ts.Parents(), err)
+	}
+
+	baseFee := parentTs.Blocks()[0].ParentBaseFee
+
+	receipt, err := newEthTxReceipt(ctx, tx, baseFee, msgLookup.Receipt, a.EthEventHandler)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to create Eth receipt: %w", err)
 	}
 
 	return &receipt, nil
@@ -539,6 +576,63 @@ func (a *EthAPI) EthGetTransactionByBlockHashAndIndex(context.Context, ethtypes.
 
 func (a *EthAPI) EthGetTransactionByBlockNumberAndIndex(context.Context, ethtypes.EthUint64, ethtypes.EthUint64) (ethtypes.EthTx, error) {
 	return ethtypes.EthTx{}, ErrUnsupported
+}
+
+func (a *EthModule) EthGetBlockReceipts(ctx context.Context, blockParam ethtypes.EthBlockNumberOrHash) ([]*api.EthTxReceipt, error) {
+	return a.EthGetBlockReceiptsLimited(ctx, blockParam, api.LookbackNoLimit)
+}
+
+func (a *EthModule) EthGetBlockReceiptsLimited(ctx context.Context, blockParam ethtypes.EthBlockNumberOrHash, limit abi.ChainEpoch) ([]*api.EthTxReceipt, error) {
+	ts, err := getTipsetByEthBlockNumberOrHash(ctx, a.Chain, blockParam)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to get tipset: %w", err)
+	}
+
+	tsCid, err := ts.Key().Cid()
+	if err != nil {
+		return nil, xerrors.Errorf("failed to get tipset key cid: %w", err)
+	}
+
+	blkHash, err := ethtypes.EthHashFromCid(tsCid)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to parse eth hash from cid: %w", err)
+	}
+
+	// Execute the tipset to get the receipts, messages, and events
+	st, msgs, receipts, err := executeTipset(ctx, ts, a.Chain, a.StateAPI)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to execute tipset: %w", err)
+	}
+
+	// Load the state tree
+	stateTree, err := a.StateManager.StateTree(st)
+	if err != nil {
+		return nil, xerrors.Errorf("failed to load state tree: %w", err)
+	}
+
+	baseFee := ts.Blocks()[0].ParentBaseFee
+
+	ethReceipts := make([]*api.EthTxReceipt, 0, len(msgs))
+	for i, msg := range msgs {
+		msg := msg
+
+		tx, err := newEthTx(ctx, a.Chain, stateTree, ts.Height(), tsCid, msg.Cid(), i)
+		if err != nil {
+			return nil, xerrors.Errorf("failed to create EthTx: %w", err)
+		}
+
+		receipt, err := newEthTxReceipt(ctx, tx, baseFee, receipts[i], a.EthEventHandler)
+		if err != nil {
+			return nil, xerrors.Errorf("failed to create Eth receipt: %w", err)
+		}
+
+		// Set the correct Ethereum block hash
+		receipt.BlockHash = blkHash
+
+		ethReceipts = append(ethReceipts, &receipt)
+	}
+
+	return ethReceipts, nil
 }
 
 // EthGetCode returns string value of the compiled bytecode
@@ -1634,7 +1728,7 @@ func (e *EthEventHandler) ethGetEventsForFilter(ctx context.Context, filterSpec 
 	}
 
 	// Create a temporary filter
-	f, err := e.EventFilterManager.Install(ctx, pf.minHeight, pf.maxHeight, pf.tipsetCid, pf.addresses, pf.keys, true)
+	f, err := e.EventFilterManager.Install(ctx, pf.minHeight, pf.maxHeight, pf.tipsetCid, pf.addresses, pf.keys, false)
 	if err != nil {
 		return nil, xerrors.Errorf("failed to install event filter: %w", err)
 	}

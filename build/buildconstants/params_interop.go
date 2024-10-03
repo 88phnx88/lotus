@@ -13,6 +13,8 @@ import (
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/go-state-types/network"
 	builtin2 "github.com/filecoin-project/specs-actors/v2/actors/builtin"
+
+	"github.com/filecoin-project/lotus/chain/actors/builtin"
 )
 
 var NetworkBundle = "caterpillarnet"
@@ -56,6 +58,11 @@ var UpgradeWaffleHeight = abi.ChainEpoch(-27)
 var UpgradeEverythingBurnsHeight = abi.ChainEpoch(-28)
 
 const UpgradeTuktukHeight = 50
+
+// FIP-0081: for the power actor state for pledge calculations.
+// UpgradeTuktukPowerRampDurationEpochs ends up in the power actor state after
+// Tuktuk migration. along with a RampStartEpoch matching the upgrade height.
+var UpgradeTuktukPowerRampDurationEpochs = uint64(builtin.EpochsInYear)
 
 // This fix upgrade only ran on calibrationnet
 const UpgradeWatermelonFixHeight = -1
@@ -140,6 +147,9 @@ var WhitelistedBlock = cid.Undef
 const F3Enabled = true
 
 var F3ManifestServerID = MustParseID("12D3KooWQJ2rdVnG4okDUB6yHQhAjNutGNemcM7XzqC9Eo4z9Jce")
+
+// The initial F3 power table CID.
+var F3InitialPowerTableCID cid.Cid = cid.Undef
 
 const F3BootstrapEpoch abi.ChainEpoch = 1000
 

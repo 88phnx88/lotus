@@ -188,13 +188,13 @@ func (gw *Node) EthGetBlockByHash(ctx context.Context, blkHash ethtypes.EthHash,
 	return gw.target.EthGetBlockByHash(ctx, blkHash, fullTxInfo)
 }
 
-func (gw *Node) EthGetBlockByNumber(ctx context.Context, blkNum string, fullTxInfo bool) (ethtypes.EthBlock, error) {
+func (gw *Node) EthGetBlockByNumber(ctx context.Context, blkNum string, fullTxInfo bool) (*ethtypes.EthBlock, error) {
 	if err := gw.limit(ctx, stateRateLimitTokens); err != nil {
-		return ethtypes.EthBlock{}, err
+		return nil, err
 	}
 
 	if err := gw.checkBlkParam(ctx, blkNum, 0); err != nil {
-		return ethtypes.EthBlock{}, err
+		return nil, err
 	}
 
 	return gw.target.EthGetBlockByNumber(ctx, blkNum, fullTxInfo)
@@ -681,6 +681,26 @@ func (gw *Node) EthTraceFilter(ctx context.Context, filter ethtypes.EthTraceFilt
 	}
 
 	return gw.target.EthTraceFilter(ctx, filter)
+}
+
+func (gw *Node) EthGetBlockReceipts(ctx context.Context, blkParam ethtypes.EthBlockNumberOrHash) ([]*api.EthTxReceipt, error) {
+	return gw.EthGetBlockReceiptsLimited(ctx, blkParam, api.LookbackNoLimit)
+}
+
+func (gw *Node) EthGetBlockReceiptsLimited(ctx context.Context, blkParam ethtypes.EthBlockNumberOrHash, limit abi.ChainEpoch) ([]*api.EthTxReceipt, error) {
+	if err := gw.limit(ctx, stateRateLimitTokens); err != nil {
+		return nil, err
+	}
+
+	if limit == api.LookbackNoLimit {
+		limit = gw.maxMessageLookbackEpochs
+	}
+
+	if gw.maxMessageLookbackEpochs != api.LookbackNoLimit && limit > gw.maxMessageLookbackEpochs {
+		limit = gw.maxMessageLookbackEpochs
+	}
+
+	return gw.target.EthGetBlockReceiptsLimited(ctx, blkParam, limit)
 }
 
 func (gw *Node) addUserFilterLimited(

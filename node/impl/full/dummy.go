@@ -51,8 +51,8 @@ func (e *EthModuleDummy) EthGetBlockByHash(ctx context.Context, blkHash ethtypes
 	return ethtypes.EthBlock{}, ErrModuleDisabled
 }
 
-func (e *EthModuleDummy) EthGetBlockByNumber(ctx context.Context, blkNum string, fullTxInfo bool) (ethtypes.EthBlock, error) {
-	return ethtypes.EthBlock{}, ErrModuleDisabled
+func (e *EthModuleDummy) EthGetBlockByNumber(ctx context.Context, blkNum string, fullTxInfo bool) (*ethtypes.EthBlock, error) {
+	return nil, ErrModuleDisabled
 }
 
 func (e *EthModuleDummy) EthGetTransactionByHash(ctx context.Context, txHash *ethtypes.EthHash) (*ethtypes.EthTx, error) {
@@ -68,6 +68,14 @@ func (e *EthModuleDummy) EthGetTransactionCount(ctx context.Context, sender etht
 }
 
 func (e *EthModuleDummy) EthGetTransactionReceipt(ctx context.Context, txHash ethtypes.EthHash) (*api.EthTxReceipt, error) {
+	return nil, ErrModuleDisabled
+}
+
+func (e *EthModuleDummy) EthGetBlockReceiptsLimited(ctx context.Context, blkParam ethtypes.EthBlockNumberOrHash, limit abi.ChainEpoch) ([]*api.EthTxReceipt, error) {
+	return nil, ErrModuleDisabled
+}
+
+func (e *EthModuleDummy) EthGetBlockReceipts(ctx context.Context, blkParam ethtypes.EthBlockNumberOrHash) ([]*api.EthTxReceipt, error) {
 	return nil, ErrModuleDisabled
 }
 
