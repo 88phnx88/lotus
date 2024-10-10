@@ -103,7 +103,7 @@ const UpgradeCalibrationDragonFixHeight = 1493854
 const UpgradeWaffleHeight = 1779094
 
 // ???
-const UpgradeEverythingBurnsHeight = math.MaxInt64 - 1
+const UpgradeEverythingBurnsHeight = 2077594
 
 var SupportedProofTypes = []abi.RegisteredSealProof{
 	abi.RegisteredSealProof_StackedDrg32GiBV1,
